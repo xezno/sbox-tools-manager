@@ -1,4 +1,6 @@
 ﻿using Sandbox;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Tools;
 
@@ -20,6 +22,9 @@ public class AddToolDialog : Dialog
 		Show();
 	}
 
+	private ListView RepoList;
+	private FolderProperty Location;
+
 	public void CreateUI()
 	{
 		SetLayout( LayoutMode.TopToBottom );
@@ -38,16 +43,16 @@ public class AddToolDialog : Dialog
 		// body
 		{
 			Layout.AddSpacingCell( 8 );
-			var repoList = Layout.Add( new ListView(), 1 );
-			repoList.ItemPaint = PaintAddonItem;
-			repoList.ItemSize = new Vector2( 0, 38 );
+			RepoList = Layout.Add( new ListView(), 1 );
+			RepoList.ItemPaint = PaintAddonItem;
+			RepoList.ItemSize = new Vector2( 0, 38 );
 			Layout.AddSpacingCell( 8 );
 
 			GithubApi.FetchSearch( "topic:sbox-tool" ).ContinueWith( t =>
 			{
 				var searchResults = t.Result;
 
-				searchResults.Items.ForEach( x => repoList.AddItem( x ) );
+				searchResults.Items.ForEach( x => RepoList.AddItem( x ) );
 			} );
 		}
 
@@ -60,7 +65,7 @@ public class AddToolDialog : Dialog
 			lo.Spacing = 4;
 
 			lo.Add( new Label( "Check-out Location" ) );
-			var Location = lo.Add( new FolderProperty( null ) );
+			Location = lo.Add( new FolderProperty( null ) );
 			Location.Text = EditorPreferences.AddonLocation.NormalizeFilename( false );
 			Location.ToolTip = "This is where the addon will be downloaded.\n The folder will be created if it doesn't exist.";
 		}
@@ -74,14 +79,84 @@ public class AddToolDialog : Dialog
 			lo.Spacing = 4;
 
 			lo.AddStretchCell();
-			var OkayButton = lo.Add( new Button.Primary( "OK" ) { Clicked = DownloadTool } );
+			var OkayButton = lo.Add( new Button.Primary( "OK" ) { Clicked = () => _ = DownloadTool() } );
 			lo.Add( new Button( "Cancel" ) { Clicked = Window.Close } );
 		}
 	}
 
-	private void DownloadTool()
+	private async Task DownloadTool()
 	{
+		var targets = RepoList.SelectedItems;
 
+		foreach ( var target in targets )
+		{
+			if ( target is not Item repo )
+				return;
+
+			Log.Trace( $"Downloading {repo.Name}" );
+
+			var release = await GithubApi.FetchLatestRelease( repo.FullName );
+
+			Log.Trace( $"Zipball: {release.ZipballUrl}" );
+
+			var folder = Location.Text;
+
+			Window.Enabled = false;
+			Window.Close();
+
+			using var progress = Progress.Start( "Downloading Source For " + repo.Name );
+			var cancelToken = Progress.GetCancel();
+
+			Progress.Update( "Creating Folder", 5, 100 );
+			await Task.Delay( 50 );
+			System.IO.Directory.CreateDirectory( folder );
+
+			Progress.Update( "Checking Out", 20, 100 );
+			await Task.Delay( 50 );
+
+			ProcessStartInfo info = new( "git", $"clone --depth 1 -b \"{release.TagName}\" \"{repo.CloneUrl}\" ." );
+			info.UseShellExecute = false;
+			info.CreateNoWindow = false;
+			info.WorkingDirectory = folder;
+
+			Log.Trace( info.FileName + " " + info.Arguments );
+
+			var process = new Process();
+			process.StartInfo = info;
+			process.Start();
+
+			await process.WaitForExitAsync( cancelToken );
+
+			Progress.Update( "Adding Addon", 90, 100 );
+			await Task.Delay( 50 );
+
+			var configPath = System.IO.Path.Combine( folder, ".addon" );
+
+			// No config file, lets make one
+			//if ( !System.IO.File.Exists( configPath ) )
+			//{
+			//	var config = new ProjectConfig();
+			//	config.CodePath = "/code/";
+			//	config.AssetsPath = "";
+			//	config.HasCode = true;
+			//	config.HasAssets = true;
+			//	config.Ident = SelectedPackage.Ident;
+			//	config.Title = SelectedPackage.Title;
+			//	config.Org = SelectedPackage.Org.Ident;
+			//	config.Type = SelectedPackage.PackageType.ToString().ToLower();
+			//	config.Schema = 1;
+
+			//	if ( config.Type == "map" )
+			//	{
+			//		config.HasCode = false;
+			//		config.CodePath = null;
+			//	}
+
+			//	System.IO.File.WriteAllText( configPath, config.ToJson() );
+			//}
+
+			Utility.Projects.TryAddFromFile( configPath );
+		}
 	}
 
 	private void PaintAddonItem( VirtualWidget v )

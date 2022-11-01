@@ -7,7 +7,7 @@ internal class Page : Widget
 
 	// TODO: Make and import a shared tools library, because maintaining these mini-widgets
 	// across separate tools is going to become a mare
-	private Label AddTitle( string text, float size = 16 )
+	private Label AddTitle( string text, float size = 14 )
 	{
 		var label = new Label( text );
 		label.SetStyles( $"font-size: {size}px; font-weight: 600; font-family: Poppins;" );
@@ -37,8 +37,8 @@ internal class Page : Widget
 			ToolBar.SetIconSize( 16 );
 			ToolBar.AddOption( "Update", "download", () => Log.Trace( "download" ) );
 			ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( System.IO.Path.GetDirectoryName( project.GetRootPath() ) ) );
-			ToolBar.AddOption( "Delete Tool", "delete", () => Log.Trace( "download" ) );
-			ToolBar.AddOption( "Open in GitHub", "open_in_new" );
+			// ToolBar.AddOption( "Delete Tool", "delete", () => Utility.Projects.Remove( project ) );
+			ToolBar.AddOption( "Open on GitHub", "open_in_new" );
 			Layout.Add( ToolBar );
 		}
 

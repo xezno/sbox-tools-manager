@@ -1,13 +1,8 @@
 ﻿using Tools;
 
+[Tool( "Tools Manager", "hardware", "Manages your tools." )]
 public class ToolsManager : BaseWindow
 {
-	[Menu( "Editor", "Tools Manager/Tools Manager" )]
-	public static void Open()
-	{
-		_ = new ToolsManager();
-	}
-
 	public ToolsManager()
 	{
 		Size = new Vector2( 600, 400 );
