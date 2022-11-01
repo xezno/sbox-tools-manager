@@ -74,7 +74,7 @@ public class AddToolDialog : Dialog
 			lo.Spacing = 4;
 
 			lo.AddStretchCell();
-			var OkayButton = lo.Add( new Button.Primary( "OK" ) );
+			var OkayButton = lo.Add( new Button.Primary( "OK" ) { Clicked = DownloadTool } );
 			lo.Add( new Button( "Cancel" ) { Clicked = Window.Close } );
 		}
 	}
@@ -82,7 +82,7 @@ public class AddToolDialog : Dialog
 	private void PaintAddonItem( VirtualWidget v )
 	{
 		var rect = v.Rect;
-		rect = rect.Shrink( 8, 0 );
+		rect = rect.Shrink( 16, 0, 8, 0 );
 
 		if ( v.Object is not Item repo )
 			return;
