@@ -28,7 +28,7 @@ internal class ToolUpdateNotice : NoticeWidget
 		NoticeManager.Remove( this, 10 );
 	}
 
-	public static void Show( int updateCount )
+	public static void Open( int updateCount )
 	{
 		var notice = new ToolUpdateNotice();
 		notice.Count = updateCount;

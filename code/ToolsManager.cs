@@ -38,7 +38,12 @@ public class ToolsManager : BaseWindow
 		}
 
 		var footer = toolsList.MenuBottom.AddRow();
-		var button = footer.Add( new Button.Primary( "Add from GitHub...", "add" ) );
-		button.Clicked = () => ToolUpdateNotice.Show( 4 );
+		footer.Spacing = 4;
+
+		var add = footer.Add( new Button.Primary( "Add Tool...", "add" ), 1 );
+		add.Clicked = () => AddToolDialog.Open();
+
+		var update = footer.Add( new Button( null, "download" ) );
+		update.Clicked = () => ToolUpdateNotice.Open( 4 );
 	}
 }

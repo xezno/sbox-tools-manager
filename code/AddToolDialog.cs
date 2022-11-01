@@ -1,13 +1,10 @@
 ﻿using Sandbox;
-using System.Net.Http;
-using System.Text.Json;
 
 namespace Tools;
 
 public class AddToolDialog : Dialog
 {
-	[Menu( "Editor", "Tools Manager/Add Tool...", "add_box" )]
-	public static void OpenWindow()
+	public static void Open()
 	{
 		_ = new AddToolDialog( null );
 	}
@@ -41,22 +38,17 @@ public class AddToolDialog : Dialog
 		// body
 		{
 			Layout.AddSpacingCell( 8 );
-			var AddonList = Layout.Add( new ListView(), 1 );
-			AddonList.ItemPaint = PaintAddonItem;
-			AddonList.ItemSize = new Vector2( 0, 38 );
+			var repoList = Layout.Add( new ListView(), 1 );
+			repoList.ItemPaint = PaintAddonItem;
+			repoList.ItemSize = new Vector2( 0, 38 );
 			Layout.AddSpacingCell( 8 );
 
-			var req = new HttpClient();
-			req.DefaultRequestHeaders.UserAgent.ParseAdd( "s&box" );
-			var content = req.GetAsync( "https://api.github.com/search/repositories?q=topic:sbox-tool" ).Result;
-			var result = content.Content.ReadAsStringAsync().Result;
-
-			var search = JsonSerializer.Deserialize<Search>( result );
-
-			foreach ( var item in search.Items )
+			GithubApi.FetchSearch( "topic:sbox-tool" ).ContinueWith( t =>
 			{
-				AddonList.AddItem( item );
-			}
+				var searchResults = t.Result;
+
+				searchResults.Items.ForEach( x => repoList.AddItem( x ) );
+			} );
 		}
 
 		Layout.AddSeparator();
@@ -90,13 +82,10 @@ public class AddToolDialog : Dialog
 	private void PaintAddonItem( VirtualWidget v )
 	{
 		var rect = v.Rect;
+		rect = rect.Shrink( 8, 0 );
 
 		if ( v.Object is not Item repo )
 			return;
-
-		Log.Trace( repo );
-
-		rect = rect.Shrink( 8, 0 );
 
 		Paint.Antialiasing = true;
 

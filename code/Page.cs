@@ -1,7 +1,4 @@
-﻿using System.Net.Http;
-using System.Text.Json;
-
-namespace Tools;
+﻿namespace Tools;
 
 internal class Page : Widget
 {
@@ -18,15 +15,20 @@ internal class Page : Widget
 		return label;
 	}
 
+	private Label LatestRelease;
+	private Label LatestReleaseName;
+	private Label LatestReleaseBody;
+
 	public Page( Sandbox.LocalProject project, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
 	{
-		var req = new HttpClient();
-		req.DefaultRequestHeaders.UserAgent.ParseAdd( "s&box" );
-		var content = req.GetAsync( "https://api.github.com/repos/xezno/sbox-quixel-bridge/releases/latest" ).Result;
-		var result = content.Content.ReadAsStringAsync().Result;
+		GithubApi.FetchLatestRelease( "xezno/sbox-quixel-bridge" ).ContinueWith( t =>
+		{
+			var latestRelease = t.Result;
 
-		var release = JsonSerializer.Deserialize<Release>( result );
-		Log.Trace( release );
+			LatestRelease.Text = $"Latest release: {latestRelease.TagName}";
+			LatestReleaseName.Text = latestRelease.Name;
+			LatestReleaseBody.Text = latestRelease.Body;
+		} );
 
 		SetLayout( LayoutMode.TopToBottom );
 
@@ -40,9 +42,10 @@ internal class Page : Widget
 		{
 			ToolBar = new ToolBar( this );
 			ToolBar.SetIconSize( 16 );
-			ToolBar.AddOption( null, "download", () => Log.Trace( "download" ) );
-			ToolBar.AddOption( null, "folder", () => Utility.OpenFolder( System.IO.Path.GetDirectoryName( project.GetRootPath() ) ) );
-			ToolBar.AddOption( null, "delete", () => Log.Trace( "download" ) );
+			ToolBar.AddOption( "Update", "download", () => Log.Trace( "download" ) );
+			ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( System.IO.Path.GetDirectoryName( project.GetRootPath() ) ) );
+			ToolBar.AddOption( "Delete Tool", "delete", () => Log.Trace( "download" ) );
+			ToolBar.AddOption( "Open in GitHub", "open_in_new" );
 			Layout.Add( ToolBar );
 		}
 
@@ -60,9 +63,9 @@ internal class Page : Widget
 		Layout.AddStretchCell();
 
 		Layout.Add( AddTitle( "GitHub" ) );
-		Layout.Add( new Label( $"Latest release: {release.TagName}" ) );
-		Layout.Add( new Label( $"{release.Name}" ) );
-		Layout.Add( new Label( $"{release.Body}" ) );
+		LatestRelease = Layout.Add( new Label( $"Loading..." ) );
+		LatestReleaseName = Layout.Add( new Label( $"Loading..." ) );
+		LatestReleaseBody = Layout.Add( new Label( $"Loading..." ) );
 	}
 
 	protected override void DoLayout()
