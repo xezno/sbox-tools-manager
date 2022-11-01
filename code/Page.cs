@@ -19,17 +19,10 @@ internal class Page : Widget
 	private Label LatestReleaseName;
 	private Label LatestReleaseBody;
 
+	private bool HasFetched = false;
+
 	public Page( Sandbox.LocalProject project, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
 	{
-		GithubApi.FetchLatestRelease( "xezno/sbox-quixel-bridge" ).ContinueWith( t =>
-		{
-			var latestRelease = t.Result;
-
-			LatestRelease.Text = $"Latest release: {latestRelease.TagName}";
-			LatestReleaseName.Text = latestRelease.Name;
-			LatestReleaseBody.Text = latestRelease.Body;
-		} );
-
 		SetLayout( LayoutMode.TopToBottom );
 
 		Layout.Spacing = 8;
@@ -66,6 +59,25 @@ internal class Page : Widget
 		LatestRelease = Layout.Add( new Label( $"Loading..." ) );
 		LatestReleaseName = Layout.Add( new Label( $"Loading..." ) );
 		LatestReleaseBody = Layout.Add( new Label( $"Loading..." ) );
+	}
+
+	protected override void OnPaint()
+	{
+		base.OnPaint();
+
+		if ( HasFetched )
+			return;
+
+		GithubApi.FetchLatestRelease( "xezno/sbox-quixel-bridge" ).ContinueWith( t =>
+		{
+			var latestRelease = t.Result ?? default;
+
+			LatestRelease.Text = $"Latest release: {latestRelease.TagName}";
+			LatestReleaseName.Text = latestRelease.Name;
+			LatestReleaseBody.Text = latestRelease.Body;
+		} );
+
+		HasFetched = true;
 	}
 
 	protected override void DoLayout()
