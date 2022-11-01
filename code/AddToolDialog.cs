@@ -79,6 +79,11 @@ public class AddToolDialog : Dialog
 		}
 	}
 
+	private void DownloadTool()
+	{
+
+	}
+
 	private void PaintAddonItem( VirtualWidget v )
 	{
 		var rect = v.Rect;
