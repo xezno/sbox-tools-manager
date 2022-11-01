@@ -1,0 +1,17 @@
+{
+  "Title": "Tools Manager",
+  "Type": "tool",
+  "Org": "local",
+  "Ident": "tools_manager",
+  "Tags": null,
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "ResourcePaths": null,
+  "HasCode": true,
+  "CodePath": "code",
+  "RootNamespace": "Tools",
+  "Metadata": {
+    "ProjectTemplate": null
+  }
+}
