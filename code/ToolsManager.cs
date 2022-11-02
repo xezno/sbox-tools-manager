@@ -1,4 +1,6 @@
-﻿using Tools;
+﻿using System.IO;
+using System.Linq;
+using Tools;
 
 [Tool( "Tools Manager", "hardware", "Manages your tools." )]
 public class ToolsManager : BaseWindow
@@ -11,8 +13,36 @@ public class ToolsManager : BaseWindow
 
 		SetWindowIcon( "hardware" );
 
+		WriteDummyManifest();
+
 		CreateUI();
 		Show();
+	}
+
+	private void WriteDummyManifest()
+	{
+		// If we don't have our own manifest, then we need to create
+		// one and (later) force an update.
+
+		var project = Utility.Projects.GetAll().First( x => x.Config.Ident == "tools_manager" );
+		var folder = project.GetRootPath();
+
+		var manifestPath = System.IO.Path.Combine( folder, "tm-manifest.json" );
+
+		if ( File.Exists( manifestPath ) )
+			return;
+
+		// Create tools manifest
+		var manifest = new Manifest();
+		manifest.ReleaseName = "None";
+		manifest.ReleaseVersion = "0";
+		manifest.ReleaseDescription = "Invalid release";
+
+		manifest.Repo = "xezno/tools-manager";
+		manifest.Description = "Manages your tools.";
+		manifest.AutoUpdate = true;
+
+		System.IO.File.WriteAllText( manifestPath, manifest.ToJson() );
 	}
 
 	public void CreateUI()
