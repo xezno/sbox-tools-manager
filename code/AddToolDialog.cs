@@ -130,31 +130,21 @@ public class AddToolDialog : Dialog
 			Progress.Update( "Adding Addon", 90, 100 );
 			await Task.Delay( 50 );
 
+			var manifestPath = System.IO.Path.Combine( folder, "tm-manifest.json" );
+
+			// Create tools manifest
+			var manifest = new Manifest();
+			manifest.ReleaseName = release.Name;
+			manifest.ReleaseVersion = release.TagName;
+			manifest.ReleaseDescription = release.Body;
+
+			manifest.Repo = repo.FullName;
+			manifest.Description = repo.Description;
+			manifest.AutoUpdate = true;
+
+			System.IO.File.WriteAllText( manifestPath, manifest.ToJson() );
+
 			var configPath = System.IO.Path.Combine( folder, ".addon" );
-
-			// No config file, lets make one
-			//if ( !System.IO.File.Exists( configPath ) )
-			//{
-			//	var config = new ProjectConfig();
-			//	config.CodePath = "/code/";
-			//	config.AssetsPath = "";
-			//	config.HasCode = true;
-			//	config.HasAssets = true;
-			//	config.Ident = SelectedPackage.Ident;
-			//	config.Title = SelectedPackage.Title;
-			//	config.Org = SelectedPackage.Org.Ident;
-			//	config.Type = SelectedPackage.PackageType.ToString().ToLower();
-			//	config.Schema = 1;
-
-			//	if ( config.Type == "map" )
-			//	{
-			//		config.HasCode = false;
-			//		config.CodePath = null;
-			//	}
-
-			//	System.IO.File.WriteAllText( configPath, config.ToJson() );
-			//}
-
 			Utility.Projects.TryAddFromFile( configPath );
 		}
 	}

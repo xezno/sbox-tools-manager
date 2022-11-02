@@ -9,9 +9,6 @@ internal class ToolUpdateNotice : NoticeWidget
 		Position = 10;
 	}
 
-	/// <summary>
-	/// Called when it's about to be re-used by a new compiler
-	/// </summary>
 	public override void Reset()
 	{
 		base.Reset();
