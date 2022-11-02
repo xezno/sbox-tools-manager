@@ -1,0 +1,39 @@
+
+Container {
+    background-color: #38393c;
+    border: 1px solid #ffffff22;
+    padding: 25px;
+    border-radius: 4px;
+}
+
+    Container LineEdit, Container TextEdit {
+        background-color: #201f21;
+        border: 0px;
+        min-height: 22px;
+        border-radius: 3px;
+        padding: 0px 5px;
+        border: 1px solid #201f21;
+        color: #bbb;
+    }
+
+        Container LineEdit:focus, Container TextEdit:focus {
+            border: 1px solid #3472E6;
+            color: #ddd;
+        }
+
+    Container ListView {
+        background-color: transparent;
+        border: 0px;
+    }
+
+    Container Button {
+        min-width: 70px;
+    }
+
+    Container Separator {
+        background-color: #222;
+    }
+
+    Container ComboBox {
+        background-color: #201f21;
+    }

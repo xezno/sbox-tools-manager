@@ -65,15 +65,20 @@ internal class Page : Widget
 		var desc = Layout.Add( new Label( $"{Manifest.Description}" ) );
 		desc.WordWrap = true;
 
-		Layout.AddSpacingCell( 8f );
-
-		Layout.Add( new Heading( "Update Available" ) );
-		LatestReleaseName = Layout.Add( new Subheading( $"Loading..." ) );
-		LatestReleaseBody = Layout.Add( new Label( $"Loading..." ) );
-
 		Layout.AddStretchCell();
 
-		Layout.Add( new Button( "Download Update", "download" ) );
+		var group = new Container( this );
+		group.SetLayout( LayoutMode.TopToBottom );
+		group.Layout.Margin = 10;
+		Layout.Add( group );
+
+		group.Layout.Add( new Heading( "Update Available" ) );
+		LatestReleaseName = group.Layout.Add( new Subheading( $"Loading..." ) );
+		LatestReleaseBody = group.Layout.Add( new Label( $"Loading..." ) );
+
+		group.Layout.AddSpacingCell( 8f );
+
+		group.Layout.Add( new Button( "Download Update", "download" ) );
 	}
 
 	private void ToggleAutoUpdates( Option option )
