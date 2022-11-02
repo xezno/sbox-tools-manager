@@ -51,7 +51,10 @@ internal class Page : Widget
 		{
 			ToolBar = new ToolBar( this );
 			ToolBar.SetIconSize( 16 );
-			ToolBar.AddOption( "Update", "download", () => Log.Trace( "Update" ) );
+			var autoUpdateOption = new Option( "Toggle Auto-Updates", "file_download_off" );
+			autoUpdateOption.Triggered = () => ToggleAutoUpdates( autoUpdateOption );
+
+			var option = ToolBar.AddOption( autoUpdateOption );
 			ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( Path.GetDirectoryName( project.GetRootPath() ) ) );
 			ToolBar.AddOption( "Open on GitHub", "open_in_new", () => Utility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
 			Layout.Add( ToolBar );
@@ -64,17 +67,19 @@ internal class Page : Widget
 
 		Layout.AddSpacingCell( 8f );
 
-		Layout.Add( new Label.Subtitle( "Installed Release" ) );
-		Layout.Add( new Label( $"{Manifest.ReleaseName}" ) );
-		Layout.Add( new Label( $"{Manifest.ReleaseDescription}" ) );
-
-		Layout.AddSpacingCell( 32f );
-
-		Layout.Add( new Label.Subtitle( "Latest Release" ) );
-		LatestReleaseName = Layout.Add( new Label( $"Loading..." ) );
+		Layout.Add( new Heading( "Update Available" ) );
+		LatestReleaseName = Layout.Add( new Subheading( $"Loading..." ) );
 		LatestReleaseBody = Layout.Add( new Label( $"Loading..." ) );
 
 		Layout.AddStretchCell();
+
+		Layout.Add( new Button( "Download Update", "download" ) );
+	}
+
+	private void ToggleAutoUpdates( Option option )
+	{
+		Manifest.AutoUpdate = !Manifest.AutoUpdate;
+		option.Icon = Manifest.AutoUpdate ? "file_download" : "file_download_off";
 	}
 
 	private void AddNoManifestWidgets( LocalProject project )

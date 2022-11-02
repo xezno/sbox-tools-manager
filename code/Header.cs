@@ -34,5 +34,10 @@ internal class Header : Widget
 		Paint.SetFont( "Poppins", 13, 450 );
 		var r = Paint.DrawText( pos, Title );
 		pos.y = r.Bottom;
+
+		r.Left = r.Right;
+		r.Width = 32;
+		r.Top -= 4;
+		Paint.DrawIcon( r, "update", 16 );
 	}
 }

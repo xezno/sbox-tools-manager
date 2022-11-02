@@ -3,7 +3,7 @@
   "Type": "tool",
   "Org": "local",
   "Ident": "tools_manager",
-  "Tags": null,
+  "Tags": "",
   "Schema": 1,
   "HasAssets": true,
   "AssetsPath": "",

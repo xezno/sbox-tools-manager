@@ -27,4 +27,9 @@ public class Manifest
 	{
 		return JsonSerializer.Serialize( this );
 	}
+
+	public bool CheckUpdateAvailable( Release latestRelease )
+	{
+		return latestRelease.TagName != ReleaseVersion;
+	}
 }

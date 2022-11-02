@@ -58,7 +58,8 @@ public class ToolsManager : BaseWindow
 
 			if ( config.PackageType == Sandbox.Package.Type.Tool )
 			{
-				toolsList.AddPage( config.Title, "hardware", new Page( project ) );
+				var option = toolsList.AddPage( config.Title, "hardware", new Page( project ) );
+				option.OnPaintOverride = () => PaintPageOption( option );
 			}
 		}
 
@@ -70,5 +71,49 @@ public class ToolsManager : BaseWindow
 
 		var update = footer.Add( new Button( null, "download" ) );
 		update.Clicked = () => ToolUpdateNotice.Open( 4 );
+	}
+
+	private bool PaintPageOption( NavigationView.Option option )
+	{
+		var fg = Theme.White.WithAlpha( 0.5f );
+
+		if ( option.IsSelected )
+		{
+			fg = Theme.White;
+		}
+
+		Paint.ClearPen();
+		Paint.SetBrush( Theme.WidgetBackground.WithAlpha( 0.0f ) );
+
+		if ( Paint.HasMouseOver )
+		{
+			fg = Theme.White.WithAlpha( 0.8f );
+		}
+
+		Paint.TextAntialiasing = true;
+		Paint.Antialiasing = true;
+
+		Paint.DrawRect( option.LocalRect.Shrink( 0 ) );
+
+		var inner = option.LocalRect.Shrink( 8, 0, 0, 0 );
+
+		Paint.SetPen( fg.WithAlphaMultiplied( 0.8f ) );
+		Paint.SetFont( "Poppins", 8, 440 );
+
+		Paint.DrawText( inner, option.Title, TextFlag.LeftCenter );
+
+		var iconRect = inner;
+		iconRect.Left = inner.Right - 32;
+		iconRect.Top -= 2;
+
+		if ( option.IsSelected )
+		{
+			Paint.SetPen( fg );
+			Paint.DrawIcon( iconRect, "update", 14, TextFlag.Center );
+
+			inner.Left += iconRect.Width + 4;
+		}
+
+		return true;
 	}
 }
