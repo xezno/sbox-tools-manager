@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Tools;
 
 [Tool( "Tools Manager", "hardware", "Manages your tools." )]
@@ -59,7 +60,9 @@ public class ToolsManager : BaseWindow
 			if ( config.PackageType == Sandbox.Package.Type.Tool )
 			{
 				var option = toolsList.AddPage( config.Title, "hardware", new Page( project ) );
-				option.OnPaintOverride = () => PaintPageOption( option );
+				var manifest = project.GetManifest();
+
+				option.OnPaintOverride = () => PaintPageOption( option, manifest );
 			}
 		}
 
@@ -73,7 +76,7 @@ public class ToolsManager : BaseWindow
 		update.Clicked = () => ToolUpdateNotice.Open( 4 );
 	}
 
-	private bool PaintPageOption( NavigationView.Option option )
+	private bool PaintPageOption( NavigationView.Option option, Manifest manifest )
 	{
 		var fg = Theme.White.WithAlpha( 0.5f );
 
@@ -106,7 +109,7 @@ public class ToolsManager : BaseWindow
 		iconRect.Left = inner.Right - 32;
 		iconRect.Top -= 2;
 
-		if ( option.IsSelected )
+		if ( manifest.CheckUpdateAvailable() )
 		{
 			Paint.SetPen( fg );
 			Paint.DrawIcon( iconRect, "update", 14, TextFlag.Center );
@@ -115,5 +118,41 @@ public class ToolsManager : BaseWindow
 		}
 
 		return true;
+	}
+
+	//
+	// I'm going to use this event because it's a decent one
+	// that runs when the editor starts plus infrequently
+	// while developing, making it quite useful
+	//
+	[Sandbox.Event( "tools.compilemgr.start" )]
+	public static void OnCompileMgrStart()
+	{
+		var count = CheckForUpdates().Result;
+
+		if ( count > 0 )
+			ToolUpdateNotice.Open( count );
+	}
+
+	private static async Task<int> CheckForUpdates()
+	{
+		int count = 0;
+
+		foreach ( var project in Utility.Projects.GetAll() )
+		{
+			var manifest = project.GetManifest();
+
+			if ( manifest == null )
+				continue;
+
+			Log.Trace( manifest );
+
+			var latest = await GithubApi.FetchLatestRelease( manifest.Repo );
+
+			if ( manifest.CheckUpdateAvailable( latest ) )
+				count++;
+		}
+
+		return count;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,6 +11,8 @@ public static class GithubApi
 {
 	private static HttpClient httpClient;
 	private static RealTimeUntil TimeUntilRatelimitReset;
+
+	private static Dictionary<string, string> Cache = new();
 
 	private static HttpClient HttpClient
 	{
@@ -44,6 +47,11 @@ public static class GithubApi
 			return "{}";
 		}
 
+		if ( Cache.TryGetValue( url, out var cachedResponse ) )
+		{
+			return cachedResponse;
+		}
+
 		var content = await HttpClient.GetAsync( url );
 		var result = await content.Content.ReadAsStringAsync();
 
@@ -59,8 +67,10 @@ public static class GithubApi
 			var timestamp = DateTime.UnixEpoch.AddSeconds( resetTime );
 			TimeUntilRatelimitReset = (float)(timestamp - DateTime.Now).TotalSeconds;
 		}
-
-		Log.Trace( $"{url} query: {result}" );
+		else
+		{
+			Cache[url] = result;
+		}
 
 		return result;
 	}

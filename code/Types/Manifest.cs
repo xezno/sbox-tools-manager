@@ -32,4 +32,10 @@ public class Manifest
 	{
 		return latestRelease.TagName != ReleaseVersion;
 	}
+
+	public bool CheckUpdateAvailable()
+	{
+		var latestRelease = GithubApi.FetchLatestRelease( Repo ).Result;
+		return CheckUpdateAvailable( latestRelease );
+	}
 }

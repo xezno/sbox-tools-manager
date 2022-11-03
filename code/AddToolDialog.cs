@@ -119,8 +119,6 @@ public class AddToolDialog : Dialog
 			info.CreateNoWindow = false;
 			info.WorkingDirectory = folder;
 
-			Log.Trace( info.FileName + " " + info.Arguments );
-
 			var process = new Process();
 			process.StartInfo = info;
 			process.Start();

@@ -35,9 +35,9 @@ internal class Header : Widget
 		var r = Paint.DrawText( pos, Title );
 		pos.y = r.Bottom;
 
-		r.Left = r.Right;
-		r.Width = 32;
-		r.Top -= 4;
-		Paint.DrawIcon( r, "update", 16 );
+		//r.Left = r.Right;
+		//r.Width = 32;
+		//r.Top -= 4;
+		//Paint.DrawIcon( r, "update", 16 );
 	}
 }
