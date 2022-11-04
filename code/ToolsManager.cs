@@ -120,6 +120,8 @@ public class ToolsManager : BaseWindow
 		return true;
 	}
 
+	private static bool HasCheckedForUpdates = false;
+
 	//
 	// I'm going to use this event because it's a decent one
 	// that runs when the editor starts plus infrequently
@@ -128,10 +130,15 @@ public class ToolsManager : BaseWindow
 	[Sandbox.Event( "tools.compilemgr.start" )]
 	public static void OnCompileMgrStart()
 	{
+		if ( HasCheckedForUpdates )
+			return;
+
 		var count = CheckForUpdates().Result;
 
 		if ( count > 0 )
 			ToolUpdateNotice.Open( count );
+
+		HasCheckedForUpdates = true;
 	}
 
 	private static async Task<int> CheckForUpdates()

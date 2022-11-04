@@ -1,5 +1,4 @@
 ﻿using Sandbox;
-using System.Diagnostics;
 using System.IO;
 
 namespace Tools;
@@ -63,8 +62,10 @@ internal class Page : Widget
 
 		Layout.AddSpacingCell( 8f );
 
-		var desc = Layout.Add( new Label( $"{Manifest.Description}" ) );
-		desc.WordWrap = true;
+		Layout.Add( new Label.Body( $"{Manifest.Description}" ) );
+
+		Layout.Add( new Subheading( $"{Manifest.ReleaseName}" ) );
+		Layout.Add( new Label.Body( $"{Manifest.ReleaseDescription}" ) );
 
 		Layout.AddStretchCell();
 
@@ -81,13 +82,13 @@ internal class Page : Widget
 
 			group.Layout.AddSpacingCell( 8f );
 
-			group.Layout.Add( new Button( "Download Update", "download" ) { Clicked = Update } );
+			group.Layout.Add( new Button( "Download Update", "download" ) { Clicked = DownloadUpdate } );
 		}
 	}
 
-	private void Update()
+	private void DownloadUpdate()
 	{
-		GithubApi.FetchLatestRelease( $"{Manifest.Repo}" ).ContinueWith( t =>
+		GithubApi.FetchLatestRelease( $"{Manifest.Repo}" ).ContinueWith( async t =>
 		{
 			var release = t.Result ?? default;
 
@@ -95,14 +96,19 @@ internal class Page : Widget
 
 			Log.Trace( folder );
 
-			ProcessStartInfo info = new( "git", $"checkout -B \"{release.TagName}\" --force" );
-			info.UseShellExecute = false;
-			info.CreateNoWindow = false;
-			info.WorkingDirectory = folder;
+			await GitUtils.Git( $"reset --hard HEAD" );
+			await GitUtils.Git( $"pull" );
+			await GitUtils.Git( $"checkout \"{release.TagName}\" --force", folder );
 
-			var process = new Process();
-			process.StartInfo = info;
-			process.Start();
+			//
+			// Update Manifest
+			//
+			Manifest.ReleaseVersion = release.TagName;
+			Manifest.ReleaseName = release.Name;
+			Manifest.ReleaseDescription = release.Body;
+
+			var manifestPath = Path.Combine( folder, "tm-manifest.json" );
+			File.WriteAllText( manifestPath, Manifest.ToJson() );
 		} );
 	}
 

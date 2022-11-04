@@ -1,5 +1,4 @@
 ﻿using Sandbox;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Tools;
@@ -105,7 +104,6 @@ public class AddToolDialog : Dialog
 			Window.Close();
 
 			using var progress = Progress.Start( "Downloading Source For " + repo.Name );
-			var cancelToken = Progress.GetCancel();
 
 			Progress.Update( "Creating Folder", 5, 100 );
 			await Task.Delay( 50 );
@@ -114,16 +112,7 @@ public class AddToolDialog : Dialog
 			Progress.Update( "Checking Out", 20, 100 );
 			await Task.Delay( 50 );
 
-			ProcessStartInfo info = new( "git", $"clone --depth 1 -b \"{release.TagName}\" \"{repo.CloneUrl}\" ." );
-			info.UseShellExecute = false;
-			info.CreateNoWindow = false;
-			info.WorkingDirectory = folder;
-
-			var process = new Process();
-			process.StartInfo = info;
-			process.Start();
-
-			await process.WaitForExitAsync( cancelToken );
+			await GitUtils.Git( $"clone -b \"{release.TagName}\" \"{repo.CloneUrl}\" .", folder );
 
 			Progress.Update( "Adding Addon", 90, 100 );
 			await Task.Delay( 50 );
