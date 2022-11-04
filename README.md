@@ -1,6 +1,6 @@
 # Tools Manager for s&box
 
-Easily manager and update your s&box tools.
+Easily manage and update your s&box tools.
 
 ![image](https://user-images.githubusercontent.com/12881812/199302787-6b4dca60-01f7-491b-98e3-3fdc39272933.png)
 
