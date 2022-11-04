@@ -1,4 +1,6 @@
 ﻿using Sandbox;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Tools;
@@ -30,21 +32,13 @@ public class AddToolDialog : Dialog
 		Layout.Spacing = 0;
 		Layout.Margin = 0;
 
-
-		// Filtering
-		{
-			var filter = Layout.Add( LayoutMode.TopToBottom );
-			filter.Margin = new( 20, 20, 20, 0 );
-
-			filter.Add( new LineEdit( "" ) { PlaceholderText = "Search GitHub..." } );
-		}
-
 		// body
 		{
 			Layout.AddSpacingCell( 8 );
 			RepoList = Layout.Add( new ListView(), 1 );
 			RepoList.ItemPaint = PaintAddonItem;
 			RepoList.ItemSize = new Vector2( 0, 38 );
+			RepoList.ItemSelected = OnRepoSelected;
 			Layout.AddSpacingCell( 8 );
 
 			GithubApi.FetchSearch( "topic:sbox-tool" ).ContinueWith( t =>
@@ -158,10 +152,53 @@ public class AddToolDialog : Dialog
 
 		Paint.SetFont( "Poppins", 10, 450 );
 		Paint.SetPen( fg );
-		Paint.DrawText( textRect, repo.Name, TextFlag.LeftTop );
+		Paint.DrawText( textRect, repo.FullName, TextFlag.LeftTop );
 
 		Paint.SetDefaultFont();
 		Paint.SetPen( fg.WithAlpha( 0.6f ) );
-		Paint.DrawText( textRect, repo.HtmlUrl, TextFlag.LeftBottom );
+		Paint.DrawText( textRect, repo.Description, TextFlag.LeftBottom );
+	}
+
+	Repository SelectedRepo;
+
+	private void OnRepoSelected( object o )
+	{
+		if ( o is not Repository repo )
+			return;
+
+		SelectedRepo = repo;
+		TrySetFolder( repo.Name );
+	}
+
+	void TrySetFolder( string subFolder )
+	{
+		try
+		{
+			var dir = new DirectoryInfo( Location.Text );
+
+			while ( true )
+			{
+				// If the folder exists and isn't an addon folder
+				//   .. then assume this is a nice place to create an addon folder
+				if ( dir.Exists && dir.GetFiles( ".addon" ).Count() == 0 )
+				{
+					Location.Text = Path.Combine( dir.FullName, subFolder ).NormalizeFilename( false );
+					return;
+				}
+
+				// If we can't find anything at all for whatever reason, default to this
+				if ( dir.Parent == null )
+				{
+					Location.Text = Path.Combine( EditorPreferences.AddonLocation, subFolder ).NormalizeFilename( false );
+					return;
+				}
+
+				dir = dir.Parent;
+			}
+		}
+		catch ( System.Exception e )
+		{
+			Log.Warning( e, e.Message );
+		}
 	}
 }
