@@ -1,8 +1,14 @@
-﻿using System.Text.Json;
+﻿using System.IO;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Tools;
 
+/// <summary>
+/// Contains information about a GitHub repository and the currently downloaded
+/// release, allowing these to be linked to (and contained within) a tools
+/// project.
+/// </summary>
 public class Manifest
 {
 	[JsonPropertyName( "repo" )]
@@ -21,7 +27,41 @@ public class Manifest
 	public string ReleaseDescription { get; set; }
 
 	[JsonPropertyName( "auto_update" )]
-	public bool AutoUpdate { get; set; }
+	public bool AutoUpdate { get; set; } = true;
+
+	public Manifest()
+	{
+	}
+
+	public Manifest( Release release, Repository repo )
+	{
+		SetRelease( release );
+		SetRepo( repo );
+	}
+
+	public void SetRelease( Release release )
+	{
+		ReleaseVersion = release.TagName;
+		ReleaseName = release.Name;
+		ReleaseDescription = release.Body;
+	}
+
+	public void SetRepo( Repository repo )
+	{
+		Repo = repo.FullName;
+		Description = repo.Description;
+	}
+
+	public void WriteToFile( string path )
+	{
+		File.WriteAllText( path, ToJson() );
+	}
+
+	public void WriteToFolder( string folder )
+	{
+		var path = Path.Combine( folder, "tm-manifest.json" );
+		WriteToFile( path );
+	}
 
 	public string ToJson()
 	{

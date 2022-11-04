@@ -3,9 +3,9 @@ using System.IO;
 
 namespace Tools;
 
-internal class Page : Widget
+internal class ToolInfoPage : Widget
 {
-	private Header Header;
+	private ToolInfoHeader Header;
 	private ToolBar ToolBar;
 
 	private Label LatestReleaseName;
@@ -14,61 +14,53 @@ internal class Page : Widget
 	private Manifest Manifest;
 	private LocalProject Project;
 
-	private bool HasFetched = false;
+	private bool HasFetched;
 
-	public Page( LocalProject project, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
+	public ToolInfoPage( LocalProject project, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
 	{
 		SetLayout( LayoutMode.TopToBottom );
-
-		this.Project = project;
 
 		Layout.Spacing = 8;
 		Layout.Margin = 24;
 
-		//
-		// Check if we have a tools manager manifest
-		//
+		Project = project;
 		Manifest = project.GetManifest();
 
 		if ( Manifest != null )
-		{
 			AddManifestWidgets();
-		}
 		else
-		{
-			// Display sad face
 			AddNoManifestWidgets();
-		}
 	}
 
+	/// <summary>
+	/// Displays information about this tool, along with release info
+	/// </summary>
 	private void AddManifestWidgets()
 	{
 		var config = Project.Config;
-		Header = Layout.Add( new Header( config.Title ) );
+
+		// Basic repo info
+		Header = Layout.Add( new ToolInfoHeader( config.Title ) );
 		Layout.AddSpacingCell( 8 );
 
-		{
-			ToolBar = new ToolBar( this );
-			ToolBar.SetIconSize( 16 );
+		ToolBar = new ToolBar( this );
+		ToolBar.SetIconSize( 16 );
 
-			// var autoUpdateOption = new Option( "Toggle Auto-Updates", Manifest.AutoUpdate ? "file_download" : "file_download_off" );
-			// autoUpdateOption.Triggered = () => ToggleAutoUpdates( autoUpdateOption );
-			// var option = ToolBar.AddOption( autoUpdateOption );
-
-			ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( Path.GetDirectoryName( Project.GetRootPath() ) ) );
-			ToolBar.AddOption( "Open on GitHub", "open_in_new", () => Utility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
-			Layout.Add( ToolBar );
-		}
+		ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( Path.GetDirectoryName( Project.GetRootPath() ) ) );
+		ToolBar.AddOption( "Open on GitHub", "open_in_new", () => Utility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
+		Layout.Add( ToolBar );
 
 		Layout.AddSpacingCell( 8f );
 
 		Layout.Add( new Label.Body( $"{Manifest.Description}" ) );
 
+		// Installed release info
 		Layout.Add( new Subheading( $"{Manifest.ReleaseName}" ) );
 		Layout.Add( new Label.Body( $"{Manifest.ReleaseDescription}" ) );
 
 		Layout.AddStretchCell();
 
+		// Update info (if available)
 		if ( Manifest.CheckUpdateAvailable() )
 		{
 			var group = new Container( this );
@@ -86,6 +78,9 @@ internal class Page : Widget
 		}
 	}
 
+	/// <summary>
+	/// Downloads the latest update for this page's project using the manifest
+	/// </summary>
 	private void DownloadUpdate()
 	{
 		GithubApi.FetchLatestRelease( $"{Manifest.Repo}" ).ContinueWith( async t =>
@@ -100,24 +95,15 @@ internal class Page : Widget
 			await GitUtils.Git( $"pull" );
 			await GitUtils.Git( $"checkout \"{release.TagName}\" --force", folder );
 
-			//
 			// Update Manifest
-			//
-			Manifest.ReleaseVersion = release.TagName;
-			Manifest.ReleaseName = release.Name;
-			Manifest.ReleaseDescription = release.Body;
-
-			var manifestPath = Path.Combine( folder, "tm-manifest.json" );
-			File.WriteAllText( manifestPath, Manifest.ToJson() );
+			Manifest.SetRelease( release );
+			Manifest.WriteToFolder( folder );
 		} );
 	}
 
-	private void ToggleAutoUpdates( Option option )
-	{
-		Manifest.AutoUpdate = !Manifest.AutoUpdate;
-		option.Icon = Manifest.AutoUpdate ? "file_download" : "file_download_off";
-	}
-
+	/// <summary>
+	/// Displays text telling the user to add the tool properly
+	/// </summary>
 	private void AddNoManifestWidgets()
 	{
 		Layout.Add( new Label.Title( "😔" ) ).SetStyles( "font-size: 64px;" );

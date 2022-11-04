@@ -5,6 +5,9 @@ namespace Tools;
 
 public static class GitUtils
 {
+	/// <summary>
+	/// Perform a git command and wait for it to finish
+	/// </summary>
 	public static async Task Git( string command, string workingDir = null )
 	{
 		Log.Trace( $"git {command}" );

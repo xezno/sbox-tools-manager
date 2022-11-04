@@ -20,20 +20,20 @@ public class ToolsManager : BaseWindow
 		Show();
 	}
 
+	/// <summary>
+	/// Tools Manager needs to be able to manage itself, so we create a 'dummy' manifest just
+	/// in case one wasn't packaged with the GitHub release.
+	/// </summary>
 	private void WriteDummyManifest()
 	{
-		// If we don't have our own manifest, then we need to create
-		// one and (later) force an update.
-
 		var project = Utility.Projects.GetAll().First( x => x.Config.Ident == "tools_manager" );
 		var folder = project.GetRootPath();
 
-		var manifestPath = System.IO.Path.Combine( folder, "tm-manifest.json" );
+		var manifestPath = Path.Combine( folder, "tm-manifest.json" );
 
 		if ( File.Exists( manifestPath ) )
 			return;
 
-		// Create tools manifest
 		var manifest = new Manifest();
 		manifest.ReleaseName = "None";
 		manifest.ReleaseVersion = "0";
@@ -43,7 +43,7 @@ public class ToolsManager : BaseWindow
 		manifest.Description = "Manages your tools.";
 		manifest.AutoUpdate = true;
 
-		System.IO.File.WriteAllText( manifestPath, manifest.ToJson() );
+		manifest.WriteToFile( manifestPath );
 	}
 
 	public void CreateUI()
@@ -59,7 +59,7 @@ public class ToolsManager : BaseWindow
 
 			if ( config.PackageType == Sandbox.Package.Type.Tool )
 			{
-				var option = toolsList.AddPage( config.Title, "hardware", new Page( project ) );
+				var option = toolsList.AddPage( config.Title, "hardware", new ToolInfoPage( project ) );
 				var manifest = project.GetManifest();
 
 				option.OnPaintOverride = () => PaintPageOption( option, manifest );
@@ -71,9 +71,6 @@ public class ToolsManager : BaseWindow
 
 		var add = footer.Add( new Button.Primary( "Add Tool...", "add" ), 1 );
 		add.Clicked = () => AddToolDialog.Open();
-
-		var update = footer.Add( new Button( null, "download" ) );
-		update.Clicked = () => ToolUpdateNotice.Open( 4 );
 	}
 
 	private bool PaintPageOption( NavigationView.Option option, Manifest manifest )
@@ -141,6 +138,9 @@ public class ToolsManager : BaseWindow
 		HasCheckedForUpdates = true;
 	}
 
+	/// <summary>
+	/// Check every tools project for any updates (if it has a valid manifest)
+	/// </summary>
 	private static async Task<int> CheckForUpdates()
 	{
 		int count = 0;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Tools;
-public class Item
+public class Repository
 {
 	[JsonPropertyName( "id" )]
 	public int Id { get; set; }
@@ -327,5 +327,5 @@ public class Search
 	public bool IncompleteResults { get; set; }
 
 	[JsonPropertyName( "items" )]
-	public List<Item> Items { get; set; }
+	public List<Repository> Items { get; set; }
 }

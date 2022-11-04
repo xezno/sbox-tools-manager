@@ -17,10 +17,10 @@ public static class WidgetExtensions
 
 		ReadAndSet();
 
-		/* var watcher = new System.IO.FileSystemWatcher();
-		watcher.Path = Path.GetDirectoryName( combinedPath );
-		watcher.Filter = Path.GetFileName( combinedPath );
-		watcher.Changed += (_, _) => ReadAndSet();
-		watcher.EnableRaisingEvents = true; */
+		//var watcher = new FileSystemWatcher();
+		//watcher.Path = Path.GetDirectoryName( combinedPath );
+		//watcher.Filter = Path.GetFileName( combinedPath );
+		//watcher.Changed += (_, _) => ReadAndSet();
+		//watcher.EnableRaisingEvents = true;
 	}
 }

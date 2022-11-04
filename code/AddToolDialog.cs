@@ -89,7 +89,7 @@ public class AddToolDialog : Dialog
 
 		foreach ( var target in targets )
 		{
-			if ( target is not Item repo )
+			if ( target is not Repository repo )
 				return;
 
 			Log.Trace( $"Downloading {repo.Name}" );
@@ -117,19 +117,8 @@ public class AddToolDialog : Dialog
 			Progress.Update( "Adding Addon", 90, 100 );
 			await Task.Delay( 50 );
 
-			var manifestPath = System.IO.Path.Combine( folder, "tm-manifest.json" );
-
-			// Create tools manifest
-			var manifest = new Manifest();
-			manifest.ReleaseName = release.Name;
-			manifest.ReleaseVersion = release.TagName;
-			manifest.ReleaseDescription = release.Body;
-
-			manifest.Repo = repo.FullName;
-			manifest.Description = repo.Description;
-			manifest.AutoUpdate = true;
-
-			System.IO.File.WriteAllText( manifestPath, manifest.ToJson() );
+			var manifest = new Manifest( release, repo );
+			manifest.WriteToFolder( folder );
 
 			var configPath = System.IO.Path.Combine( folder, ".addon" );
 			Utility.Projects.TryAddFromFile( configPath );
@@ -141,7 +130,7 @@ public class AddToolDialog : Dialog
 		var rect = v.Rect;
 		rect = rect.Shrink( 16, 0, 8, 0 );
 
-		if ( v.Object is not Item repo )
+		if ( v.Object is not Repository repo )
 			return;
 
 		Paint.Antialiasing = true;

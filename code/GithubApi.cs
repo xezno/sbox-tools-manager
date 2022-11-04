@@ -76,7 +76,7 @@ public static class GithubApi
 	}
 
 	/// <summary>
-	/// standard search query format
+	/// Perform a GitHub repository search, see https://docs.github.com/en/rest/search#search-repositories for more info
 	/// </summary>
 	public static async Task<Search> FetchSearch( string searchQuery )
 	{
@@ -85,7 +85,7 @@ public static class GithubApi
 	}
 
 	/// <summary>
-	/// in format "author/repo"
+	/// Get the latest release for a repo, see https://docs.github.com/en/rest/releases/releases#get-the-latest-release for more info
 	/// </summary>
 	public static async Task<Release> FetchLatestRelease( string repository )
 	{

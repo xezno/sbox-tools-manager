@@ -5,12 +5,12 @@
 // but this isn't ideal.. could do with our own proper widget for stuff
 // like this
 //
-internal class Header : Widget
+internal class ToolInfoHeader : Widget
 {
 	const float HeaderHeight = 64 + 8;
 	private string Title;
 
-	public Header( string title, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
+	public ToolInfoHeader( string title, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
 	{
 		Title = title;
 		Height = HeaderHeight;
