@@ -44,7 +44,7 @@ public class ToolsManager : BaseWindow
 		manifest.ReleaseVersion = "0";
 		manifest.ReleaseDescription = "Invalid release";
 
-		manifest.Repo = "xezno/tools-manager";
+		manifest.Repo = "xezno/sbox-tools-manager";
 		manifest.Description = "Manages your tools.";
 		manifest.AutoUpdate = true;
 
