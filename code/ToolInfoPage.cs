@@ -1,19 +1,17 @@
 ﻿using Sandbox;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Tools;
 
 internal class ToolInfoPage : Widget
 {
+	private LocalTool Tool;
+
 	private ToolInfoHeader Header;
 	private ToolBar ToolBar;
 
 	private Label LatestReleaseName;
 	private Label LatestReleaseBody;
-
-	private Manifest Manifest;
-	private LocalProject Project;
 
 	private bool HasFetched;
 
@@ -24,43 +22,40 @@ internal class ToolInfoPage : Widget
 		Layout.Spacing = 8;
 		Layout.Margin = 24;
 
-		UpdateFromProject( project );
+		UpdateFromTool( new LocalTool( project ) );
 	}
 
-	private void UpdateFromProject( LocalProject project )
+	private void UpdateFromTool( LocalTool tool )
 	{
+		Tool = tool;
+
 		DestroyChildren();
 
-		Project = project;
-		Manifest = project.GetManifest();
-
-		if ( Manifest != null )
-			AddManifestWidgets();
+		if ( Tool.IsValid() )
+			AddWidgets();
 		else
-			AddNoManifestWidgets();
+			AddErrorWidgets();
 	}
 
 	/// <summary>
 	/// Displays information about this tool, along with release info
 	/// </summary>
-	private void AddManifestWidgets()
+	private void AddWidgets()
 	{
-		var config = Project.Config;
-
 		// Basic repo info
-		Header = Layout.Add( new ToolInfoHeader( config.Title ) );
+		Header = Layout.Add( new ToolInfoHeader( Tool.Title ) );
 		Layout.AddSpacingCell( 8 );
 
 		ToolBar = new ToolBar( this );
 		ToolBar.SetIconSize( 16 );
 
-		ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( Path.GetDirectoryName( Project.GetRootPath() ) ) );
-		ToolBar.AddOption( "Open on GitHub", "open_in_new", () => Utility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
+		ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( Path.GetDirectoryName( Tool.RootPath ) ) );
+		ToolBar.AddOption( "Open on GitHub", "open_in_new", () => Utility.OpenFolder( Tool.Url ) );
 		Layout.Add( ToolBar );
 
 		Layout.AddSpacingCell( 8f );
 
-		Layout.Add( new Label( $"{Manifest.Description}" ) { WordWrap = true } );
+		Layout.Add( new Label( $"{Tool.Description}" ) { WordWrap = true } );
 
 		// Installed release info
 		{
@@ -68,8 +63,8 @@ internal class ToolInfoPage : Widget
 			var canvas = new Widget( this );
 			canvas.SetLayout( LayoutMode.TopToBottom );
 
-			canvas.Layout.Add( new Subheading( $"{Manifest.ReleaseName}" ) );
-			canvas.Layout.Add( new Label( $"{Manifest.ReleaseDescription}" ) { WordWrap = true } );
+			canvas.Layout.Add( new Subheading( $"{Tool.CurrentRelease.Name}" ) );
+			canvas.Layout.Add( new Label( $"{Tool.CurrentRelease.Body}" ) { WordWrap = true } );
 			canvas.Layout.AddStretchCell();
 
 			scroll.Canvas = canvas;
@@ -78,7 +73,7 @@ internal class ToolInfoPage : Widget
 		}
 
 		// Update info (if available)
-		if ( Manifest.CheckUpdateAvailable() )
+		if ( Tool.NeedsUpdate() )
 		{
 			var group = new Container( this );
 			group.SetLayout( LayoutMode.TopToBottom );
@@ -109,42 +104,20 @@ internal class ToolInfoPage : Widget
 	/// </summary>
 	private void DownloadUpdate()
 	{
-		var release = GithubApi.FetchLatestRelease( $"{Manifest.Repo}" ).Result;
-
-		var folder = Project.GetRootPath();
-
-		Log.Trace( folder );
-
-		using var progress = Progress.Start( $"Updating {Project.Config.Title}" );
-
-		Progress.Update( "Removing local changes", 5, 100 );
-		_ = GitUtils.Git( $"reset --hard HEAD" );
-		_ = Task.Delay( 50 );
-
-
-		Progress.Update( "Pulling remote changes", 25, 100 );
-		_ = GitUtils.Git( $"pull" );
-		_ = Task.Delay( 50 );
-
-		Progress.Update( "Checking out release...", 90, 100 );
-		_ = GitUtils.Git( $"checkout \"{release.TagName}\" --force", folder );
-		_ = Task.Delay( 50 );
-
-		// Update Manifest
-		Manifest.SetRelease( release );
-		Manifest.WriteToFolder( folder );
-
-		// Refresh UI
-		UpdateFromProject( Project );
+		if ( Tool.Update() )
+		{
+			// Refresh UI
+			UpdateFromTool( Tool );
+		}
 	}
 
 	/// <summary>
 	/// Displays text telling the user to add the tool properly
 	/// </summary>
-	private void AddNoManifestWidgets()
+	private void AddErrorWidgets()
 	{
 		Layout.Add( new Label.Title( "😔" ) ).SetStyles( "font-size: 64px;" );
-		Layout.Add( new Label.Body( $"'{Project.Config.Title}' does not have a manifest file, because you didn't import " +
+		Layout.Add( new Label.Body( $"'{Tool.Title}' does not have a manifest file, because you didn't import " +
 			"it through Tools Manager. Remove the tool and re-add it from GitHub by clicking \"Add Tool...\" " +
 			"in the bottom left." ) );
 
@@ -160,16 +133,13 @@ internal class ToolInfoPage : Widget
 		if ( HasFetched )
 			return;
 
-		GithubApi.FetchLatestRelease( $"{Manifest.Repo}" ).ContinueWith( t =>
-		{
-			var latestRelease = t.Result ?? default;
+		var latestRelease = Tool.LatestRelease;
 
-			if ( LatestReleaseName == null || LatestReleaseBody == null )
-				return;
+		if ( LatestReleaseName == null || LatestReleaseBody == null )
+			return;
 
-			LatestReleaseName.Text = latestRelease.Name;
-			LatestReleaseBody.Text = latestRelease.Body;
-		} );
+		LatestReleaseName.Text = latestRelease.Name;
+		LatestReleaseBody.Text = latestRelease.Body;
 
 		HasFetched = true;
 	}
