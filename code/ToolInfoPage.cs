@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Tools;
 
@@ -22,6 +23,13 @@ internal class ToolInfoPage : Widget
 
 		Layout.Spacing = 8;
 		Layout.Margin = 24;
+
+		UpdateFromProject( project );
+	}
+
+	private void UpdateFromProject( LocalProject project )
+	{
+		DestroyChildren();
 
 		Project = project;
 		Manifest = project.GetManifest();
@@ -52,13 +60,22 @@ internal class ToolInfoPage : Widget
 
 		Layout.AddSpacingCell( 8f );
 
-		Layout.Add( new Label.Body( $"{Manifest.Description}" ) );
+		Layout.Add( new Label( $"{Manifest.Description}" ) { WordWrap = true } );
 
 		// Installed release info
-		Layout.Add( new Subheading( $"{Manifest.ReleaseName}" ) );
-		Layout.Add( new Label.Body( $"{Manifest.ReleaseDescription}" ) );
+		{
+			var scroll = new ScrollArea( this );
+			var canvas = new Widget( this );
+			canvas.SetLayout( LayoutMode.TopToBottom );
 
-		Layout.AddStretchCell();
+			canvas.Layout.Add( new Subheading( $"{Manifest.ReleaseName}" ) );
+			canvas.Layout.Add( new Label( $"{Manifest.ReleaseDescription}" ) { WordWrap = true } );
+			canvas.Layout.AddStretchCell();
+
+			scroll.Canvas = canvas;
+
+			Layout.Add( scroll );
+		}
 
 		// Update info (if available)
 		if ( Manifest.CheckUpdateAvailable() )
@@ -68,12 +85,21 @@ internal class ToolInfoPage : Widget
 			group.Layout.Margin = 10;
 			Layout.Add( group );
 
-			group.Layout.Add( new Heading( "Update Available" ) );
-			LatestReleaseName = group.Layout.Add( new Subheading( $"Loading..." ) );
-			LatestReleaseBody = group.Layout.Add( new Label( $"Loading..." ) );
+			{
+				group.Layout.Add( new Heading( "Update Available" ) );
+
+				var scroll = new ScrollArea( this );
+				var canvas = new Widget( this );
+				canvas.SetLayout( LayoutMode.TopToBottom );
+
+				LatestReleaseName = canvas.Layout.Add( new Subheading( $"Loading..." ) );
+				LatestReleaseBody = canvas.Layout.Add( new Label( $"Loading..." ) );
+
+				scroll.Canvas = canvas;
+				group.Layout.Add( scroll );
+			}
 
 			group.Layout.AddSpacingCell( 8f );
-
 			group.Layout.Add( new Button( "Download Update", "download" ) { Clicked = DownloadUpdate } );
 		}
 	}
@@ -83,22 +109,33 @@ internal class ToolInfoPage : Widget
 	/// </summary>
 	private void DownloadUpdate()
 	{
-		GithubApi.FetchLatestRelease( $"{Manifest.Repo}" ).ContinueWith( async t =>
-		{
-			var release = t.Result ?? default;
+		var release = GithubApi.FetchLatestRelease( $"{Manifest.Repo}" ).Result;
 
-			var folder = Project.GetRootPath();
+		var folder = Project.GetRootPath();
 
-			Log.Trace( folder );
+		Log.Trace( folder );
 
-			await GitUtils.Git( $"reset --hard HEAD" );
-			await GitUtils.Git( $"pull" );
-			await GitUtils.Git( $"checkout \"{release.TagName}\" --force", folder );
+		using var progress = Progress.Start( $"Updating {Project.Config.Title}" );
 
-			// Update Manifest
-			Manifest.SetRelease( release );
-			Manifest.WriteToFolder( folder );
-		} );
+		Progress.Update( "Removing local changes", 5, 100 );
+		_ = GitUtils.Git( $"reset --hard HEAD" );
+		_ = Task.Delay( 50 );
+
+
+		Progress.Update( "Pulling remote changes", 25, 100 );
+		_ = GitUtils.Git( $"pull" );
+		_ = Task.Delay( 50 );
+
+		Progress.Update( "Checking out release...", 90, 100 );
+		_ = GitUtils.Git( $"checkout \"{release.TagName}\" --force", folder );
+		_ = Task.Delay( 50 );
+
+		// Update Manifest
+		Manifest.SetRelease( release );
+		Manifest.WriteToFolder( folder );
+
+		// Refresh UI
+		UpdateFromProject( Project );
 	}
 
 	/// <summary>

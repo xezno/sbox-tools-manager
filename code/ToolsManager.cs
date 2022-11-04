@@ -6,8 +6,12 @@ using Tools;
 [Tool( "Tools Manager", "hardware", "Manages your tools." )]
 public class ToolsManager : BaseWindow
 {
+	public static ToolsManager Instance { get; set; }
+
 	public ToolsManager()
 	{
+		Instance = this;
+
 		Size = new Vector2( 600, 400 );
 		MinimumSize = Size;
 		WindowTitle = "Tools Manager";
@@ -16,6 +20,7 @@ public class ToolsManager : BaseWindow
 
 		WriteDummyManifest();
 
+		SetLayout( LayoutMode.LeftToRight );
 		CreateUI();
 		Show();
 	}
@@ -46,12 +51,15 @@ public class ToolsManager : BaseWindow
 		manifest.WriteToFile( manifestPath );
 	}
 
+	public void Refresh()
+	{
+		DestroyChildren();
+		CreateUI();
+	}
+
 	public void CreateUI()
 	{
-		SetLayout( LayoutMode.LeftToRight );
-		var layout = Layout;
-
-		var toolsList = layout.Add( new NavigationView( this ) );
+		var toolsList = Layout.Add( new NavigationView( this ) );
 
 		foreach ( var project in Utility.Projects.GetAll() )
 		{

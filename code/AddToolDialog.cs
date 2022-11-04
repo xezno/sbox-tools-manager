@@ -123,6 +123,8 @@ public class AddToolDialog : Dialog
 			var configPath = System.IO.Path.Combine( folder, ".addon" );
 			Utility.Projects.TryAddFromFile( configPath );
 		}
+
+		ToolsManager.Instance.Refresh();
 	}
 
 	private void PaintAddonItem( VirtualWidget v )

@@ -14,7 +14,7 @@ public static class GitUtils
 
 		ProcessStartInfo info = new( "git", command );
 		info.UseShellExecute = false;
-		info.CreateNoWindow = false;
+		info.CreateNoWindow = true;
 
 		if ( workingDir != null )
 			info.WorkingDirectory = workingDir;
