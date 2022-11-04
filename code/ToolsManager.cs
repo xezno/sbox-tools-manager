@@ -114,7 +114,7 @@ public class ToolsManager : BaseWindow
 		iconRect.Left = inner.Right - 32;
 		iconRect.Top -= 2;
 
-		if ( manifest.CheckUpdateAvailable() )
+		if ( manifest?.CheckUpdateAvailable() ?? false )
 		{
 			Paint.SetPen( fg );
 			Paint.DrawIcon( iconRect, "update", 14, TextFlag.Center );
