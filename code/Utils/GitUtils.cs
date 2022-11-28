@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Tools;
@@ -21,7 +23,19 @@ public static class GitUtils
 
 		var process = new Process();
 		process.StartInfo = info;
-		process.Start();
+
+		try
+		{
+			process.Start();
+		}
+		catch ( Exception e )
+		{
+			var test = new PopupWindow( "Error executing git command!",
+				$"Failed to initialize git, do you have it installed?\n\nThe error was:\n{e.Message}", "OK",
+				new Dictionary<string, Action>() { { "Open download link", () => Utility.OpenFolder( "https://git-scm.com/" ) } } );
+			test.Show();
+			return;
+		}
 
 		await process.WaitForExitAsync();
 	}
