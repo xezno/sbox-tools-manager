@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Tools;
+namespace Editor;
 public class Repository
 {
 	[JsonPropertyName( "id" )]

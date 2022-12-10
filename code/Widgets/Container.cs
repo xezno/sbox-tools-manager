@@ -1,6 +1,4 @@
-﻿using Tools;
-
-public class Container : Widget
+﻿public class Container : Widget
 {
 	public Container( Widget parent ) : base( parent )
 	{

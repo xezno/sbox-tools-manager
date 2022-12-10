@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace Tools;
+namespace Editor;
 
 public class PopupWindow : BaseWindow
 {

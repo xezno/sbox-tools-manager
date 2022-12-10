@@ -1,8 +1,7 @@
-﻿using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Tools;
+namespace Editor;
 
 /// <summary>
 /// Contains information about a GitHub repository and the currently downloaded

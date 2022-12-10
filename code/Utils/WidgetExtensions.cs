@@ -1,8 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using Tools;
-
-public static class WidgetExtensions
+﻿public static class WidgetExtensions
 {
 	public static void SetStylesheet( this Widget widget, string path )
 	{

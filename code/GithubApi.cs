@@ -1,11 +1,7 @@
-﻿using Sandbox;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Net.Http;
-using System.Threading.Tasks;
 
-namespace Tools;
+namespace Editor;
 
 public static class GithubApi
 {

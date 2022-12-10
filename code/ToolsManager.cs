@@ -1,7 +1,10 @@
-﻿using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Tools;
+﻿global using Editor;
+global using Sandbox;
+global using System.Collections.Generic;
+global using System.Diagnostics;
+global using System.IO;
+global using System.Linq;
+global using System.Threading.Tasks;
 
 [Tool( "Tools Manager", "hardware", "Manages your tools." )]
 public class ToolsManager : BaseWindow

@@ -1,4 +1,4 @@
-﻿namespace Tools;
+﻿namespace Editor;
 
 public class Heading : Label
 {

@@ -1,4 +1,4 @@
-﻿namespace Tools;
+﻿namespace Editor;
 
 //
 // Copied this from base inspector stuff so that things stay consistent,

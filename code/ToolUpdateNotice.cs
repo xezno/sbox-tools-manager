@@ -1,4 +1,4 @@
-﻿namespace Tools;
+﻿namespace Editor;
 internal class ToolUpdateNotice : NoticeWidget
 {
 	private int Count;

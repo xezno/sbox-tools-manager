@@ -1,8 +1,4 @@
-﻿using Sandbox;
-using System.IO;
-using System.Threading.Tasks;
-
-namespace Tools;
+﻿namespace Editor;
 
 internal class ToolInfoPage : Widget
 {

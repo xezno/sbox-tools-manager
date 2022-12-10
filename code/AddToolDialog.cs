@@ -1,9 +1,4 @@
-﻿using Sandbox;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Tools;
+﻿namespace Editor;
 
 public class AddToolDialog : Dialog
 {
