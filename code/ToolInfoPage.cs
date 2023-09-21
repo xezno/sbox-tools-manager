@@ -15,7 +15,7 @@ internal class ToolInfoPage : Widget
 
 	public ToolInfoPage( LocalProject project, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
 	{
-		SetLayout( LayoutMode.TopToBottom );
+		this.SetLayout( LayoutMode.TopToBottom );
 
 		Layout.Spacing = 8;
 		Layout.Margin = 24;
@@ -50,8 +50,8 @@ internal class ToolInfoPage : Widget
 		ToolBar = new ToolBar( this );
 		ToolBar.SetIconSize( 16 );
 
-		ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( Path.GetDirectoryName( Project.GetRootPath() ) ) );
-		ToolBar.AddOption( "Open on GitHub", "open_in_new", () => Utility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
+		ToolBar.AddOption( "Open in Explorer", "folder", () => EditorUtility.OpenFolder( Path.GetDirectoryName( Project.GetRootPath() ) ) );
+		ToolBar.AddOption( "Open on GitHub", "open_in_new", () => EditorUtility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
 		Layout.Add( ToolBar );
 
 		Layout.AddSpacingCell( 8f );

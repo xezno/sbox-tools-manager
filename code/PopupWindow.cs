@@ -19,7 +19,7 @@ public class PopupWindow : BaseWindow
 
 		SetModal( true, true );
 
-		SetLayout( LayoutMode.TopToBottom );
+		this.SetLayout( LayoutMode.TopToBottom );
 		Layout.Margin = 24;
 		Layout.Spacing = 24;
 
