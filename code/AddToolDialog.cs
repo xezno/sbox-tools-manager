@@ -23,7 +23,7 @@ public class AddToolDialog : Dialog
 
 	public void CreateUI()
 	{
-		SetLayout( LayoutMode.TopToBottom );
+		this.SetLayout( LayoutMode.TopToBottom );
 		Layout.Spacing = 0;
 		Layout.Margin = 0;
 
@@ -110,7 +110,7 @@ public class AddToolDialog : Dialog
 			manifest.WriteToFolder( folder );
 
 			var configPath = System.IO.Path.Combine( folder, ".addon" );
-			Utility.Projects.TryAddFromFile( configPath );
+			EditorUtility.Projects.TryAddFromFile( configPath );
 		}
 
 		ToolsManager.Instance.Refresh();
