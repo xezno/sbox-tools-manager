@@ -15,7 +15,7 @@ internal class ToolInfoHeader : Widget
 		Title = title;
 		Height = HeaderHeight;
 
-		SetLayout( LayoutMode.TopToBottom );
+		Layout = Layout.Column();
 	}
 
 	protected override void OnPaint()

@@ -23,7 +23,7 @@ public class ToolsManager : BaseWindow
 
 		WriteDummyManifest();
 
-		SetLayout( LayoutMode.LeftToRight );
+		Layout = Layout.Row();
 		CreateUI();
 		Show();
 	}
@@ -34,7 +34,7 @@ public class ToolsManager : BaseWindow
 	/// </summary>
 	private void WriteDummyManifest()
 	{
-		var project = Utility.Projects.GetAll().First( x => x.Config.Ident == "tools_manager" );
+		var project = EditorUtility.Projects.GetAll().First( x => x.Config.Ident == "tools_manager" );
 		var folder = project.GetRootPath();
 
 		var manifestPath = Path.Combine( folder, "tm-manifest.json" );
@@ -64,7 +64,7 @@ public class ToolsManager : BaseWindow
 	{
 		var toolsList = Layout.Add( new NavigationView( this ) );
 
-		foreach ( var project in Utility.Projects.GetAll() )
+		foreach ( var project in EditorUtility.Projects.GetAll() )
 		{
 			var config = project.Config;
 
@@ -156,7 +156,7 @@ public class ToolsManager : BaseWindow
 	{
 		int count = 0;
 
-		foreach ( var project in Utility.Projects.GetAll() )
+		foreach ( var project in EditorUtility.Projects.GetAll() )
 		{
 			var manifest = project.GetManifest();
 
