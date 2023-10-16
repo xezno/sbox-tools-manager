@@ -29,7 +29,7 @@ public static class GitUtils
 		{
 			var test = new PopupWindow( "Error executing git command!",
 				$"Failed to initialize git, do you have it installed?\n\nThe error was:\n{e.Message}", "OK",
-				new Dictionary<string, Action>() { { "Open download link", () => Utility.OpenFolder( "https://git-scm.com/" ) } } );
+				new Dictionary<string, Action>() { { "Open download link", () => EditorUtility.OpenFolder( "https://git-scm.com/" ) } } );
 			test.Show();
 			return;
 		}

@@ -2,7 +2,7 @@
 {
 	public static void SetStylesheet( this Widget widget, string path )
 	{
-		var basePath = Utility.Projects.GetAll().FirstOrDefault( x => x.Config.Ident == "tools_manager" ).GetCodePath();
+		var basePath = EditorUtility.Projects.GetAll().FirstOrDefault( x => x.Config.Ident == "tools_manager" ).GetCodePath();
 		var combinedPath = basePath + path;
 
 		void ReadAndSet()

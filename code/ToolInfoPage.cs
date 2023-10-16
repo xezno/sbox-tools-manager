@@ -15,7 +15,7 @@ internal class ToolInfoPage : Widget
 
 	public ToolInfoPage( LocalProject project, Widget parent = null, bool isDarkWindow = false ) : base( parent, isDarkWindow )
 	{
-		SetLayout( LayoutMode.TopToBottom );
+		Layout = Layout.Column();
 
 		Layout.Spacing = 8;
 		Layout.Margin = 24;
@@ -50,8 +50,8 @@ internal class ToolInfoPage : Widget
 		ToolBar = new ToolBar( this );
 		ToolBar.SetIconSize( 16 );
 
-		ToolBar.AddOption( "Open in Explorer", "folder", () => Utility.OpenFolder( Path.GetDirectoryName( Project.GetRootPath() ) ) );
-		ToolBar.AddOption( "Open on GitHub", "open_in_new", () => Utility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
+		ToolBar.AddOption( "Open in Explorer", "folder", () => EditorUtility.OpenFolder( Path.GetDirectoryName( Project.GetRootPath() ) ) );
+		ToolBar.AddOption( "Open on GitHub", "open_in_new", () => EditorUtility.OpenFolder( $"https://github.com/{Manifest.Repo}" ) );
 		Layout.Add( ToolBar );
 
 		Layout.AddSpacingCell( 8f );
@@ -62,7 +62,7 @@ internal class ToolInfoPage : Widget
 		{
 			var scroll = new ScrollArea( this );
 			var canvas = new Widget( this );
-			canvas.SetLayout( LayoutMode.TopToBottom );
+			canvas.Layout = Layout.Column();
 
 			canvas.Layout.Add( new Subheading( $"{Manifest.ReleaseName}" ) );
 			canvas.Layout.Add( new Label( $"{Manifest.ReleaseDescription}" ) { WordWrap = true } );
@@ -77,7 +77,7 @@ internal class ToolInfoPage : Widget
 		if ( Manifest.CheckUpdateAvailable() )
 		{
 			var group = new Container( this );
-			group.SetLayout( LayoutMode.TopToBottom );
+			group.Layout = Layout.Column();
 			group.Layout.Margin = 10;
 			Layout.Add( group );
 
@@ -86,7 +86,7 @@ internal class ToolInfoPage : Widget
 
 				var scroll = new ScrollArea( this );
 				var canvas = new Widget( this );
-				canvas.SetLayout( LayoutMode.TopToBottom );
+				canvas.Layout = Layout.Column();
 
 				LatestReleaseName = canvas.Layout.Add( new Subheading( $"Loading..." ) );
 				LatestReleaseBody = canvas.Layout.Add( new Label( $"Loading..." ) );
